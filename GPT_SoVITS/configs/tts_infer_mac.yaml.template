@@ -1,7 +1,20 @@
+### 맥 추론용 설정 템플릿
+#
+# 실제로 쓰는 파일은 tts_infer_mac.yaml 이고 .gitignore 대상이다.
+# device 가 기기마다 다르기 때문이다.
+#   - MPS 가 되는 맥(애플 실리콘): mps
+#   - MPS 가 없는 맥: cpu
+# scripts/setup-mac.sh 가 MPS 가용 여부를 보고 __DEVICE__ 를 채워 생성한다.
+# 수동으로 만들 때는 이 파일을 복사해 __DEVICE__ 만 바꾸면 된다.
+#
+#   cp tts_infer_mac.yaml.template tts_infer_mac.yaml
+#
+# default / default_v2 는 쓰지 않는 경로라 cpu 로 고정해 둔다.
+# api_v2.py 는 custom 섹션을 읽는다.
 custom:
   bert_base_path: GPT_SoVITS/pretrained_models/chinese-roberta-wwm-ext-large
   cnhuhbert_base_path: GPT_SoVITS/pretrained_models/chinese-hubert-base
-  device: cpu
+  device: __DEVICE__
   is_half: false
   t2s_weights_path: GPT_SoVITS/pretrained_models/gsv-v2final-pretrained/s1bert25hz-5kh-longer-epoch=12-step=369668.ckpt
   version: v2

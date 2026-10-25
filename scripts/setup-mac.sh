@@ -234,12 +234,32 @@ fi
 step "점검"
 
 MAC_YAML="$REPO_ROOT/GPT_SoVITS/configs/tts_infer_mac.yaml"
-if [ -f "$MAC_YAML" ]; then
-    if grep -q 'device: cpu' "$MAC_YAML"; then
-        info "OK   tts_infer_mac.yaml (device: cpu, version: v2)"
-    else
-        warn "tts_infer_mac.yaml 의 device 가 cpu 가 아닙니다. 확인하세요."
+MAC_YAML_TPL="$MAC_YAML.template"
+# device 는 기기마다 다르다(MPS 되는 맥=mps, 안 되는 맥=cpu). 그래서 실제 yaml 은
+# .gitignore 대상이고, 템플릿에서 이 기기에 맞게 생성한다.
+if [ ! -f "$MAC_YAML" ] && [ -f "$MAC_YAML_TPL" ]; then
+    _DEV="cpu"
+    if [ -x "$VENV/bin/python" ] && "$VENV/bin/python" - <<'PY' >/dev/null 2>&1
+import sys
+try:
+    import torch
+    sys.exit(0 if torch.backends.mps.is_available() else 1)
+except Exception:
+    sys.exit(1)
+PY
+    then
+        _DEV="mps"
     fi
+    sed "s/__DEVICE__/$_DEV/" "$MAC_YAML_TPL" > "$MAC_YAML"
+    info "tts_infer_mac.yaml 생성 (device: $_DEV)"
+fi
+
+if [ -f "$MAC_YAML" ]; then
+    _CUR_DEV="$(awk '/^custom:/{f=1} f && /device:/{print $2; exit}' "$MAC_YAML")"
+    case "$_CUR_DEV" in
+        mps|cpu) info "OK   tts_infer_mac.yaml (device: $_CUR_DEV, version: v2)" ;;
+        *) warn "tts_infer_mac.yaml 의 device 가 '$_CUR_DEV' 입니다. mps 또는 cpu 여야 합니다." ;;
+    esac
 else
     warn "$MAC_YAML 이 없습니다. 기본 tts_infer.yaml 은 device 가 cuda 라 맥에서 실패합니다."
 fi

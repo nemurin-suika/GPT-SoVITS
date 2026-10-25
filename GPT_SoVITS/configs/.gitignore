@@ -1,2 +1,2 @@
 *.yaml
-!tts_infer_mac.yaml
+!tts_infer_mac.yaml.template

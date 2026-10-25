@@ -7,14 +7,16 @@
 #
 # run.sh 와 다른 점:
 #   - -c 로 tts_infer_mac.yaml 을 준다. 기본 tts_infer.yaml 은 device 가 cuda 라
-#     맥에서는 모델을 올리는 순간 터진다. 이 장비에서는 MPS 가 available=false 라
-#     CPU 추론 설정을 쓴다.
+#     맥에서는 모델을 올리는 순간 터진다. 그 yaml 은 기기마다 device 가 달라서
+#     (MPS 되는 맥=mps, 안 되는 맥=cpu) .gitignore 대상이고,
+#     scripts/setup-mac.sh 가 tts_infer_mac.yaml.template 에서 만들어 준다.
 #   - 바인딩을 127.0.0.1 로 둔다. 같은 기기의 백엔드만 쓰면 충분하고,
 #     사내망에 TTS 를 열 이유가 없다.
 #   - 저장소의 .venv 파이썬을 직접 쓴다. conda 활성화가 필요 없다.
 #
 # 환경 변수로 바꿀 수 있는 것:
-#   GPTSOVITS_REF_AUDIO    참조 음성 파일 (기본 siroko.wav)
+#   GPTSOVITS_REF_AUDIO    참조 음성 파일 (기기마다 다르므로 기본값 없음.
+#                          기동 스크립트나 셸에서 지정한다)
 #   GPTSOVITS_PROMPT_TEXT  그 음성이 말하는 내용 (사람이 직접 받아 적는다.
 #                          자동 전사는 틀릴 수 있어 기본값을 두지 않는다)
 #   GPTSOVITS_HOST         바인딩 주소 (기본 127.0.0.1)
@@ -24,12 +26,13 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
-REF_AUDIO="${GPTSOVITS_REF_AUDIO:-siroko.wav}"
+REF_AUDIO="${GPTSOVITS_REF_AUDIO:-}"
 PROMPT_TEXT="${GPTSOVITS_PROMPT_TEXT:-}"
 HOST="${GPTSOVITS_HOST:-127.0.0.1}"
 PORT="${GPTSOVITS_PORT:-9880}"
 CONFIG="GPT_SoVITS/configs/tts_infer_mac.yaml"
-AI_HOME="${MIZUKI_AI_HOME:-~/ai}"
+# 런타임 캐시를 실제 홈 밖에 두고 싶은 기기만 MIZUKI_AI_HOME 을 지정한다.
+AI_HOME="${MIZUKI_AI_HOME:-$HOME}"
 
 export HOME="$AI_HOME"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$AI_HOME/.cache}"
@@ -42,6 +45,12 @@ PY=".venv/bin/python"
 [ -n "$PY" ] || { echo "ERROR: 파이썬을 찾지 못했습니다. scripts/setup-mac.sh 를 먼저 돌리세요." >&2; exit 1; }
 
 [ -f "$CONFIG" ] || { echo "ERROR: $CONFIG 가 없습니다." >&2; exit 1; }
+
+if [ -z "$REF_AUDIO" ]; then
+    echo "ERROR: 참조 음성이 지정되지 않았습니다." >&2
+    echo "       GPTSOVITS_REF_AUDIO 로 파일명을 지정하세요 (기기마다 달라서 기본값이 없습니다)." >&2
+    exit 1
+fi
 
 if [ ! -f "$REF_AUDIO" ]; then
     echo "ERROR: 참조 음성이 없습니다 — $REF_AUDIO" >&2
