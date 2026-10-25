@@ -22,7 +22,17 @@ ffprobe*
 tools/AP_BWE_main/24kto48k/g_24kto48k.zip
 *.mp4
 
-# 참조 음성(저작권 자료). 저장소에 올리지 않는다.
-saki.wav
-saki.mp3
-*.ref.wav
+# 음성 파일은 저장소에 올리지 않는다(참조 음성 = 저작권 자료).
+# 참조 음성은 각 머신에서 수동으로 배치한다. doc 참고.
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+*.aac
+*.opus
+*.aiff
+*.wma
+
+# 예외: upstream(RVC-Boss/GPT-SoVITS)이 포함한 BigVGAN 데모 샘플
+!GPT_SoVITS/BigVGAN/demo/examples/*.wav
