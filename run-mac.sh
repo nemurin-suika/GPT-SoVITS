@@ -14,7 +14,8 @@
 #
 # 환경 변수로 바꿀 수 있는 것:
 #   GPTSOVITS_REF_AUDIO    참조 음성 파일 (기본 saki.wav)
-#   GPTSOVITS_PROMPT_TEXT  그 음성이 말하는 내용
+#   GPTSOVITS_PROMPT_TEXT  그 음성이 말하는 내용 (사람이 직접 받아 적는다.
+#                          자동 전사는 틀릴 수 있어 기본값을 두지 않는다)
 #   GPTSOVITS_HOST         바인딩 주소 (기본 127.0.0.1)
 #   GPTSOVITS_PORT         포트 (기본 9880)
 # =============================================================================
@@ -23,7 +24,7 @@ set -u
 cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 REF_AUDIO="${GPTSOVITS_REF_AUDIO:-saki.wav}"
-PROMPT_TEXT="${GPTSOVITS_PROMPT_TEXT:-내부가 뻑뻑해서 그런지 조금도 움직이질 않아.}"
+PROMPT_TEXT="${GPTSOVITS_PROMPT_TEXT:-}"
 HOST="${GPTSOVITS_HOST:-127.0.0.1}"
 PORT="${GPTSOVITS_PORT:-9880}"
 CONFIG="GPT_SoVITS/configs/tts_infer_mac.yaml"
@@ -39,6 +40,12 @@ if [ ! -f "$REF_AUDIO" ]; then
     echo "       GPTSOVITS_REF_AUDIO 로 지정하거나 파일을 이 디렉토리에 두세요." >&2
     echo "       (저작권 자료라 저장소에 들어 있지 않습니다)" >&2
     exit 1
+fi
+
+if [ -z "$PROMPT_TEXT" ]; then
+    echo "WARN: 참조 대사(prompt_text)가 비어 있습니다." >&2
+    echo "      conf.yaml 의 prompt_text 에 그 음성이 말하는 내용을 직접 적으세요." >&2
+    echo "      비어 있으면 발음과 억양 품질이 떨어집니다." >&2
 fi
 
 echo "[GPT-SoVITS] $HOST:$PORT  참조음성=$REF_AUDIO  설정=$CONFIG"
