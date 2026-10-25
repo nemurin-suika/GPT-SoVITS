@@ -21,3 +21,8 @@ ffmpeg*
 ffprobe*
 tools/AP_BWE_main/24kto48k/g_24kto48k.zip
 *.mp4
+
+# 참조 음성(저작권 자료). 저장소에 올리지 않는다.
+saki.wav
+saki.mp3
+*.ref.wav
