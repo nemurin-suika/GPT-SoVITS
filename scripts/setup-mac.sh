@@ -235,10 +235,10 @@ step "점검"
 
 MAC_YAML="$REPO_ROOT/GPT_SoVITS/configs/tts_infer_mac.yaml"
 if [ -f "$MAC_YAML" ]; then
-    if grep -q 'device: mps' "$MAC_YAML"; then
-        info "OK   tts_infer_mac.yaml (device: mps, version: v2)"
+    if grep -q 'device: cpu' "$MAC_YAML"; then
+        info "OK   tts_infer_mac.yaml (device: cpu, version: v2)"
     else
-        warn "tts_infer_mac.yaml 의 device 가 mps 가 아닙니다. 확인하세요."
+        warn "tts_infer_mac.yaml 의 device 가 cpu 가 아닙니다. 확인하세요."
     fi
 else
     warn "$MAC_YAML 이 없습니다. 기본 tts_infer.yaml 은 device 가 cuda 라 맥에서 실패합니다."
